@@ -13,7 +13,6 @@ app = typer.Typer()
 def find_matching_targets(archived_repo_urls, snyk_targets):
     matching_targets = []
     for target in snyk_targets:
-        print(f"Snyk Target: {json.dumps(target, indent=4)}")
         try:
             target_url = target.get("attributes", {}).get("url")
             if target_url in archived_repo_urls:
@@ -48,9 +47,6 @@ def generate_archived_repos_json(
     archived_repo_urls = get_archived_repos_urls(github_org_name, GITHUB_TOKEN)
     snyk_targets = get_snyk_targets(snyk_tenant, snyk_org_id)
     all_projects = []
-    
-    print(f"Here are the archived repo URLs: {json.dumps(archived_repo_urls, indent=4)}")
-    print({json.dumps(snyk_targets, indent=4)})
 
     # Find matching Snyk targets
     print(f"Finding matching targets for archived repos in Snyk...")
