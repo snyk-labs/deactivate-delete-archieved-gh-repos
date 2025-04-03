@@ -62,8 +62,8 @@ def snyk_rest_endpoint(url, method, headers=None, body=None, return_body=False):
             except requests.exceptions.RequestException as e:
                 return f"An error occurred during DELETE request: {e}"
 
-def get_snyk_targets(orgId):
-    url = f'https://api.snyk.io/rest/orgs/{orgId}/targets?version={rest_version}'
+def get_snyk_targets(tenant, orgId):
+    url = f'https://{tenant}/rest/orgs/{orgId}/targets?version={rest_version}'
 
     try:
         targetsApiResponse = snyk_rest_endpoint(url, 'GET', restHeaders)
@@ -73,8 +73,8 @@ def get_snyk_targets(orgId):
         print("Snyk Targets endpoint failed.")
         print(exc)
 
-def get_snyk_projects_by_target_id(orgId, targetId):
-    url = f'https://api.snyk.io/rest/orgs/{orgId}/projects?version={rest_version}&target_id={targetId}'
+def get_snyk_projects_by_target_id(tenant, orgId, targetId):
+    url = f'https://{tenant}/rest/orgs/{orgId}/projects?version={rest_version}&target_id={targetId}'
 
     try:
         projectsApiResponse = snyk_rest_endpoint(url, 'GET', restHeaders)
@@ -83,8 +83,8 @@ def get_snyk_projects_by_target_id(orgId, targetId):
         print("Snyk Projects endpoint failed.")
         print(exc)
         
-def deactivate_project(orgId, projectId):
-    url = f'https://api.snyk.io/v1/org/{orgId}/project/{projectId}/deactivate'
+def deactivate_project(tenant, orgId, projectId):
+    url = f'https://{tenant}/v1/org/{orgId}/project/{projectId}/deactivate'
 
     try:
         deactivateResponse = snyk_rest_endpoint(url, 'POST', restHeaders, body={})
@@ -93,8 +93,8 @@ def deactivate_project(orgId, projectId):
         print("Snyk Deactivate Project endpoint failed.")
         print(exc)  
 
-def delete_project(orgId, projectId):
-    url = f'https://api.snyk.io/rest/orgs/{orgId}/projects/{projectId}?version={rest_version}'
+def delete_project(tenant, orgId, projectId):
+    url = f'https://{tenant}/rest/orgs/{orgId}/projects/{projectId}?version={rest_version}'
 
     try:
         deleteResponse = snyk_rest_endpoint(url, 'DELETE', restHeaders)

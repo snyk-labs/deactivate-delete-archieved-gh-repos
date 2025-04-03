@@ -24,10 +24,10 @@ def find_matching_targets(archived_repo_urls, snyk_targets):
             })
     return matching_targets
 
-def get_all_projects(matching_targets, snyk_org_id):
+def get_all_projects(matching_targets, snyk_tenant, snyk_org_id):
     all_projects = []
     for target in matching_targets:
-        projects = get_snyk_projects_by_target_id(snyk_org_id, target.get("snyk_target_id"))
+        projects = get_snyk_projects_by_target_id(snyk_tenant, snyk_org_id, target.get("snyk_target_id"))
         # Check if projects is a dictionary and contains 'data'
         if isinstance(projects, dict) and 'data' in projects:
             all_projects.extend(projects['data'])
@@ -40,10 +40,11 @@ def get_all_projects(matching_targets, snyk_org_id):
 def generate_archived_repos_json(
     github_org_name: str = typer.Option(..., "--github-org-name", "-g", help="The name of the GitHub organization to search for archived repos"),
     snyk_org_id: str = typer.Option(..., "--snyk-org-id", "-s", help="The ID of the Snyk organization to search for targets"),
-    output_file: str = typer.Option("archived-projects.json", "--output-file", "-o", help="The file path to write the JSON data")
+    output_file: str = typer.Option("archived-projects.json", "--output-file", "-o", help="The file path to write the JSON data"),
+    snyk_tenant: str = typer.Option("api.us.snyk.io", "--snyk-tenant", "-st", help="The tenant of the Snyk organization")
 ):
     archived_repo_urls = get_archived_repos_urls(github_org_name, GITHUB_TOKEN)
-    snyk_targets = get_snyk_targets(snyk_org_id)
+    snyk_targets = get_snyk_targets(snyk_tenant, snyk_org_id)
     all_projects = []
 
     # Find matching Snyk targets
@@ -52,7 +53,7 @@ def generate_archived_repos_json(
     
     # Find projects by target id
     print(f"Finding projects by target id...")
-    all_projects = get_all_projects(matching_targets, snyk_org_id)
+    all_projects = get_all_projects(matching_targets, snyk_tenant, snyk_org_id)
 
     # Write matching targets to a JSON file
     write_json_to_file(all_projects, output_file)
@@ -60,6 +61,7 @@ def generate_archived_repos_json(
 @app.command()
 def deactivate_from_json(
     input_file: str = typer.Option(..., "--input-file", "-i", help="The file path to read the JSON data from"),
+    snyk_tenant: str = typer.Option("api.us.snyk.io", "--snyk-tenant", "-st", help="The tenant of the Snyk organization")
 ):
     """Read JSON data from a file and perform deactivation."""
     try:
@@ -67,7 +69,7 @@ def deactivate_from_json(
             project_data = json.load(json_file)
             for project in project_data:
                 print(f"Deactivating target: {project['id']} with URL: {project['attributes']['name']}")
-                deactivate_project(project['relationships']['organization']['data']['id'], project['id'])
+                deactivate_project(snyk_tenant, project['relationships']['organization']['data']['id'], project['id'])
     except IOError as e:
         print(f"An error occurred while reading the file: {e}")
     except json.JSONDecodeError as e:
@@ -76,6 +78,7 @@ def deactivate_from_json(
 @app.command()
 def delete_from_json(
     input_file: str = typer.Option(..., "--input-file", "-i", help="The file path to read the JSON data from"),
+    snyk_tenant: str = typer.Option("api.us.snyk.io", "--snyk-tenant", "-st", help="The tenant of the Snyk organization")
 ):
     """Read JSON data from a file and perform delete."""
     try:
@@ -83,7 +86,7 @@ def delete_from_json(
             project_data = json.load(json_file)
             for project in project_data:
                 print(f"Deleting target: {project['id']} with URL: {project['attributes']['name']}")
-                delete_project(project['relationships']['organization']['data']['id'], project['id'])
+                delete_project(snyk_tenant, project['relationships']['organization']['data']['id'], project['id'])
     except IOError as e:
         print(f"An error occurred while reading the file: {e}")
     except json.JSONDecodeError as e:
