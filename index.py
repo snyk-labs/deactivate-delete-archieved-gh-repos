@@ -13,7 +13,10 @@ app = typer.Typer()
 def find_matching_targets(archived_repo_urls, snyk_targets):
     matching_targets = []
     for target in snyk_targets:
-        target_url = target.get("attributes", {}).get("url")
+        try:
+            target_url = target.get("attributes", {}).get("url")
+        except:
+            print(f"Error getting target URL for {target}")
         if target_url in archived_repo_urls:
             matching_targets.append({
                 "snyk_target_id": target.get("id"),
