@@ -50,6 +50,7 @@ def generate_archived_repos_json(
     all_projects = []
     
     print(f"Here are the archived repo URLs: {json.dumps(archived_repo_urls, indent=4)}")
+    print({json.dumps(snyk_targets, indent=4)})
 
     # Find matching Snyk targets
     print(f"Finding matching targets for archived repos in Snyk...")

@@ -13,7 +13,7 @@ v1Headers = {'Content-Type': 'application/json; charset=utf-8', 'Authorization':
 rest_version = '2024-10-15'
 
 # Paginate through Snyk's API endpoints with retry and backoff
-def snyk_rest_endpoint(url, method, headers=None, body=None, return_body=False):
+def snyk_rest_endpoint(url, method, tenant, headers=None, body=None, return_body=False):
     match method.upper():
         case 'POST':
             try:
@@ -43,7 +43,7 @@ def snyk_rest_endpoint(url, method, headers=None, body=None, return_body=False):
                 
                 # If there is a 'next' link, continue pagination
                 while next_url:
-                    next_url = 'https://api.snyk.io' + next_url
+                    next_url = f'https://{tenant}' + next_url
                     response = requests.get(next_url, headers=headers)
                     response.raise_for_status()
                     data = response.json()
@@ -66,7 +66,7 @@ def get_snyk_targets(tenant, orgId):
     url = f'https://{tenant}/rest/orgs/{orgId}/targets?version={rest_version}'
 
     try:
-        targetsApiResponse = snyk_rest_endpoint(url, 'GET', restHeaders)
+        targetsApiResponse = snyk_rest_endpoint(url, 'GET', tenant, restHeaders)
         return targetsApiResponse
     except HTTPError as exc:
         # Raise an error
@@ -77,7 +77,7 @@ def get_snyk_projects_by_target_id(tenant, orgId, targetId):
     url = f'https://{tenant}/rest/orgs/{orgId}/projects?version={rest_version}&target_id={targetId}'
 
     try:
-        projectsApiResponse = snyk_rest_endpoint(url, 'GET', restHeaders)
+        projectsApiResponse = snyk_rest_endpoint(url, 'GET', tenant, restHeaders)
         return projectsApiResponse
     except HTTPError as exc:
         print("Snyk Projects endpoint failed.")
@@ -87,7 +87,7 @@ def deactivate_project(tenant, orgId, projectId):
     url = f'https://{tenant}/v1/org/{orgId}/project/{projectId}/deactivate'
 
     try:
-        deactivateResponse = snyk_rest_endpoint(url, 'POST', restHeaders, body={})
+        deactivateResponse = snyk_rest_endpoint(url, 'POST', tenant, restHeaders, body={})
         return deactivateResponse
     except HTTPError as exc:
         print("Snyk Deactivate Project endpoint failed.")
@@ -97,7 +97,7 @@ def delete_project(tenant, orgId, projectId):
     url = f'https://{tenant}/rest/orgs/{orgId}/projects/{projectId}?version={rest_version}'
 
     try:
-        deleteResponse = snyk_rest_endpoint(url, 'DELETE', restHeaders)
+        deleteResponse = snyk_rest_endpoint(url, 'DELETE', tenant, restHeaders)
         return deleteResponse
     except HTTPError as exc:
         print("Snyk Delete Project endpoint failed.")
