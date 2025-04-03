@@ -39,33 +39,37 @@ This tool helps you identify archived repositories in GitHub that are also impor
 ### Generate Archived Repositories JSON
 
 This command generates a JSON file containing Snyk projects that match archived GitHub repositories.
+
 ```bash
-python index.py generate-archived-repos-json --github-org-name <GITHUB_ORG_NAME> --snyk-org-id <SNYK_ORG_ID> [--output-file <OUTPUT_FILE>]
+python index.py generate-archived-repos-json --github-org-name <GITHUB_ORG_NAME> --snyk-org-id <SNYK_ORG_ID> [--output-file <OUTPUT_FILE>] [--snyk-tenant <SNYK_TENANT>]
 ```
 
 - `--github-org-name` or `-g`: The name of the GitHub organization to search for archived repos.
 - `--snyk-org-id` or `-s`: The ID of the Snyk organization to search for targets.
 - `--output-file` or `-o`: (Optional) The file path to write the JSON data. Defaults to `archived-projects.json`.
+- `--snyk-tenant` or `-st`: (Optional) The tenant of the Snyk organization. Defaults to `api.us.snyk.io`.
 
 ### Deactivate Projects from JSON
 
 This command reads a JSON file and deactivates the corresponding projects in Snyk.
 
 ```bash
-python index.py deactivate-from-json --input-file <INPUT_FILE>
+python index.py deactivate-from-json --input-file <INPUT_FILE> [--snyk-tenant <SNYK_TENANT>]
 ```
 
 - `--input-file` or `-i`: The file path to read the JSON data from.
+- `--snyk-tenant` or `-st`: (Optional) The tenant of the Snyk organization. Defaults to `api.us.snyk.io`.
 
 ### Delete Projects from JSON
 
 This command reads a JSON file and deletes the corresponding projects in Snyk.
 
 ```bash
-python index.py delete-from-json --input-file <INPUT_FILE>
+python index.py delete-from-json --input-file <INPUT_FILE> [--snyk-tenant <SNYK_TENANT>]
 ```
 
 - `--input-file` or `-i`: The file path to read the JSON data from.
+- `--snyk-tenant` or `-st`: (Optional) The tenant of the Snyk organization. Defaults to `api.us.snyk.io`.
 
 ## Example
 

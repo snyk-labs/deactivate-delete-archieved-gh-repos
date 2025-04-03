@@ -15,13 +15,14 @@ def find_matching_targets(archived_repo_urls, snyk_targets):
     for target in snyk_targets:
         try:
             target_url = target.get("attributes", {}).get("url")
+            if target_url in archived_repo_urls:
+                matching_targets.append({
+                    "snyk_target_id": target.get("id"),
+                    "url": target_url
+                })
         except:
             print(f"Error getting target URL for {target}")
-        if target_url in archived_repo_urls:
-            matching_targets.append({
-                "snyk_target_id": target.get("id"),
-                "url": target_url
-            })
+        
     return matching_targets
 
 def get_all_projects(matching_targets, snyk_tenant, snyk_org_id):
