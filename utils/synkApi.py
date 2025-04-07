@@ -1,7 +1,7 @@
 import json
 import requests
-from requests.exceptions import HTTPError
 import time
+import sys
 
 from utils.tokenReader import get_snyk_token
 
@@ -22,7 +22,8 @@ def snyk_rest_endpoint(url, method, tenant, headers=None, body=None, return_body
                 # Return the body if include_body is true, otherwise return the status code
                 return response.json() if return_body else response.status_code
             except requests.exceptions.RequestException as e:
-                return f"An error occurred during POST request: {e}"
+                print(f"An error occurred during POST request: {e}")
+                return e.response.status_code
 
         case 'GET':
             try:
@@ -52,7 +53,8 @@ def snyk_rest_endpoint(url, method, tenant, headers=None, body=None, return_body
                 
                 return results
             except requests.exceptions.RequestException as e:
-                return f"An error occurred during GET request: {e}"
+                print(f"An error occurred during GET request: {e}")
+                return e.response.status_code
 
         case 'DELETE':
             try:
@@ -60,45 +62,56 @@ def snyk_rest_endpoint(url, method, tenant, headers=None, body=None, return_body
                 response.raise_for_status()  # Raise an error for bad responses
                 return response.status_code
             except requests.exceptions.RequestException as e:
-                return f"An error occurred during DELETE request: {e}"
+                print(f"An error occurred during DELETE request: {e}")
+                return e.response.status_code
 
 def get_snyk_targets(tenant, orgId):
     url = f'https://{tenant}/rest/orgs/{orgId}/targets?version={rest_version}'
 
     try:
         targetsApiResponse = snyk_rest_endpoint(url, 'GET', tenant, restHeaders)
+        if targetsApiResponse == 401:
+            print("Unauthorized access. Please check if the tenant is valid and the token is correct.")
+            sys.exit(1)
         return targetsApiResponse
-    except HTTPError as exc:
-        # Raise an error
+    except:       
         print("Snyk Targets endpoint failed.")
-        print(exc)
-
+        return targetsApiResponse
 def get_snyk_projects_by_target_id(tenant, orgId, targetId):
     url = f'https://{tenant}/rest/orgs/{orgId}/projects?version={rest_version}&target_id={targetId}'
 
     try:
         projectsApiResponse = snyk_rest_endpoint(url, 'GET', tenant, restHeaders)
+        if projectsApiResponse == 401:
+            print("Unauthorized access. Please check if the tenant is valid and the token is correct.")
+            sys.exit(1)
         return projectsApiResponse
-    except HTTPError as exc:
+    except:
         print("Snyk Projects endpoint failed.")
-        print(exc)
-        
+        return projectsApiResponse
+
 def deactivate_project(tenant, orgId, projectId):
     url = f'https://{tenant}/v1/org/{orgId}/project/{projectId}/deactivate'
 
     try:
         deactivateResponse = snyk_rest_endpoint(url, 'POST', tenant, restHeaders, body={})
+        if deactivateResponse == 401:
+            print("Unauthorized access. Please check if the tenant is valid and the token is correct.")
+            sys.exit(1)
         return deactivateResponse
-    except HTTPError as exc:
+    except:
         print("Snyk Deactivate Project endpoint failed.")
-        print(exc)  
+        return deactivateResponse
 
 def delete_project(tenant, orgId, projectId):
     url = f'https://{tenant}/rest/orgs/{orgId}/projects/{projectId}?version={rest_version}'
 
     try:
         deleteResponse = snyk_rest_endpoint(url, 'DELETE', tenant, restHeaders)
+        if deleteResponse == 401:
+            print("Unauthorized access. Please check if the tenant is valid and the token is correct.")
+            sys.exit(1)
         return deleteResponse
-    except HTTPError as exc:
+    except:
         print("Snyk Delete Project endpoint failed.")
-        print(exc)
+        return deleteResponse
