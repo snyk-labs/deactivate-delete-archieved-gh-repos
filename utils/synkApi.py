@@ -69,8 +69,8 @@ def get_snyk_targets(tenant, orgId):
     url = f'https://{tenant}/rest/orgs/{orgId}/targets?version={rest_version}'
 
     try:
-        targetsApiResponse = snyk_rest_endpoint(url, 'GET', tenant, restHeaders)
-        if targetsApiResponse == 401:
+        targetsApiResponse = requests.get(url, headers=restHeaders)
+        if targetsApiResponse.status_code == 401:
             print("Unauthorized access. Please check if the tenant is valid and the token is correct.")
             sys.exit(1)
         return targetsApiResponse
