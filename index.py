@@ -63,9 +63,11 @@ def generate_archived_repos_json(
 
     logging.info("Finding matching targets for archived repos in Snyk...")
     matching_targets = find_matching_targets(archived_repo_urls, snyk_targets)
+    logging.debug(f"Matching targets findings: {json.dumps(matching_targets, indent=4)}")
     
     logging.info("Finding projects by target id...")
     all_projects = get_all_projects(matching_targets, snyk_tenant, snyk_org_id)
+    logging.debug(f"All projects findings: {json.dumps(all_projects, indent=4)}")
 
     logging.info("Writing matching targets to a JSON file")
     write_json_to_file(all_projects, output_file)
