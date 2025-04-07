@@ -73,7 +73,8 @@ def get_snyk_targets(tenant, orgId):
         if targetsApiResponse.status_code == 401:
             print("Unauthorized access. Please check if the tenant is valid and the token is correct.")
             sys.exit(1)
-        return targetsApiResponse
+        if targetsApiResponse.status_code == 200:
+            return targetsApiResponse.json()['data']
     except:       
         print("Snyk Targets endpoint failed.")
         return targetsApiResponse
