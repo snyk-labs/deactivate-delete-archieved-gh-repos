@@ -58,8 +58,8 @@ def generate_archived_repos_json(
     snyk_targets = get_snyk_targets(snyk_tenant, snyk_org_id)
     all_projects = []
 
-    logging.debug(f"Archived repo URLs: {archived_repo_urls}")
-    logging.debug(f"Snyk targets: {snyk_targets}")
+    logging.debug(f"Archived repo URLs: {json.dumps(archived_repo_urls, indent=4)}")
+    logging.debug(f"Snyk targets: {json.dumps(snyk_targets, indent=4)}")
 
     logging.info("Finding matching targets for archived repos in Snyk...")
     matching_targets = find_matching_targets(archived_repo_urls, snyk_targets)
