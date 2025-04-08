@@ -66,18 +66,38 @@ def snyk_rest_endpoint(url, method, tenant, headers=None, body=None, return_body
                 return e.response.status_code
 
 def get_snyk_targets(tenant, orgId):
-    url = f'https://{tenant}/rest/orgs/{orgId}/targets?version={rest_version}'
+    url = f'https://{tenant}/rest/orgs/{orgId}/targets?version={rest_version}&limit=10'
 
     try:
-        targetsApiResponse = requests.get(url, headers=restHeaders)
-        if targetsApiResponse.status_code == 401:
-            print("Unauthorized access. Please check if the tenant is valid and the token is correct.")
-            sys.exit(1)
-        if targetsApiResponse.status_code == 200:
-            return targetsApiResponse.json()['data']
-    except:       
-        print("Snyk Targets endpoint failed.")
-        return targetsApiResponse
+        results = []
+        response = requests.get(url, headers=restHeaders)
+        response.raise_for_status()  # Raise an error for bad responses
+        data = response.json()
+        
+        # Collect data from the first page
+        results.extend(data['data'])
+                
+        # Check for the 'next' link
+        next_url = data.get('links', {}).get('next')
+                
+        if not next_url:
+        # If no 'next' link, return the collected results immediately
+            return data
+                
+        # If there is a 'next' link, continue pagination
+        while next_url:
+            next_url = f'https://{tenant}' + next_url
+            response = requests.get(next_url, headers=restHeaders)
+            response.raise_for_status()
+            data = response.json()
+            results.extend(data['data'])
+            next_url = data.get('links', {}).get('next')
+                
+        return results
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred during GET request: {e}")
+        return e.response.status_code
+    
 def get_snyk_projects_by_target_id(tenant, orgId, targetId):
     url = f'https://{tenant}/rest/orgs/{orgId}/projects?version={rest_version}&target_id={targetId}'
 
