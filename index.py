@@ -1,6 +1,7 @@
 import typer
 import json
 import logging
+import sys
 
 from utils.githubApi import get_archived_repos_urls
 from utils.tokenReader import get_github_token
@@ -13,7 +14,7 @@ app = typer.Typer()
 
 def setup_logging(level: str):
     logging.basicConfig(
-        format='%(asctime)s - %(levelname)s - %(message)s',
+        format='%(asctime)s - %(levelname)s - %(message)s', stream=sys.stdout,
         level=getattr(logging, level.upper(), logging.INFO)
     )
 
@@ -60,6 +61,10 @@ def generate_archived_repos_json(
 
     logging.debug(f"Archived repo URLs: {json.dumps(archived_repo_urls, indent=4)}")
     logging.debug(f"Snyk targets: {json.dumps(snyk_targets, indent=4)}")
+    
+    # Check if 'data' exists in snyk_targets and set snyk_targets to it
+    if 'data' in snyk_targets:
+        snyk_targets = snyk_targets['data']
 
     logging.info("Finding matching targets for archived repos in Snyk...")
     matching_targets = find_matching_targets(archived_repo_urls, snyk_targets)
